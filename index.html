@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naveen Prabakar Portfolio</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%; /* Set height to 100% to prevent scrolling cut-off */
+            font-family: cursive, 'Arial', sans-serif;
+            background: #0d0d0d;
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: "";
+            position: fixed; /* Changed to fixed for background to stay in place */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 1)), url('https://images.unsplash.com/photo-1519608487953-e999c86e7455');
+            background-size: cover;
+            animation: starAnimation 50s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes starAnimation {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 10000px 10000px;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #00e6e6;
+            text-shadow: 0 0 10px #00e6e6;
+            animation: glow 2s infinite;
+            margin-top: 20px;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 10px #00e6e6; }
+            50% { text-shadow: 0 0 20px #00ffff; }
+            100% { text-shadow: 0 0 10px #00e6e6; }
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center items horizontally */
+            justify-content: center; /* Center items vertically */
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 1200px;
+            text-align: center;
+            flex-grow: 1; /* Allow the container to grow */
+        }
+
+        .bio-box {
+            background-color: rgba(0, 230, 230, 0.2);
+            border: 1px solid #00e6e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            width: 100%; /* Full width for smaller screens */
+        }
+
+        .bio-box h2 {
+            color: #00e6e6;
+            text-shadow: 0 0 10px #00e6e6;
+        }
+
+        .nav-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 2px solid #00e6e6;
+            color: #fff;
+            background-color: #000;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1.1em;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+            text-decoration: none;
+        }
+
+        .nav-button:hover {
+            background-color: #00e6e6;
+            color: #000;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #0d0d0d;
+            border-top: 2px solid #00e6e6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            .bio-box {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to My Portfolio</h1>
+    <div class="container">
+        <div class="bio-box">
+            <h2>Naveen Prabakar</h2>
+            <p><strong>Location:</strong> Hoffman Estates, IL</p>
+            <p><strong>Email:</strong> <a href="mailto:nvnprabakar@gmail.com" style="color:#00e6e6;">nvnprabakar@gmail.com</a></p>
+            <p><strong>Education:</strong> Pursuing a Bachelor of Science in Computer Science with a Minor in Data Science & Applied AI from Iowa State University, expected graduation in May 2026.</p>
+            <p><strong>Technical Skills:</strong> Proficient in Python, Java, C#, SQL, and various frameworks and tools including Docker, MySQL, and Flask.</p>
+            <p><strong>Experience:</strong> Currently a Lead Computer Science Tutor at Iowa State University, providing tutoring for various courses and enhancing students' understanding of core concepts.</p>
+        </div>
+
+        <p>
+            <a href="https://linkedin.com/in/naveen-prabakar-88492b284/" target="_blank" style="color:#00e6e6;">LinkedIn</a> |
+            <a href="https://github.com/NaveenPrabakar" target="_blank" style="color:#00e6e6;">GitHub</a>
+        </p>
+
+        <!-- Navigation buttons -->
+        <a class="nav-button" href="projects.html">Projects</a>
+        <a class="nav-button" href="work_experience.html">Work Experience</a>
+        <a class="nav-button" href="skills_education.html">Skills & Education</a>
+    </div>
+</body>
+
+</html>
+
+
+
+
