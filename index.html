@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naveen Prabakar Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Source Code Pro', monospace; 
+            color: #f0f0f0; 
+            background: #1e1e1e;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0;
+        }
+        header { 
+            background: #282828;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        header a { 
+            color: #66d9ef; 
+            text-decoration: none;
+            margin: 0 1rem; 
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        header a:hover { 
+            color: #f8d210; 
+        }
+
+        .hero { 
+            background-color: #222;
+            color: #f8f8f2;
+            text-align: center;
+            padding: 3rem 1rem;
+            border-bottom: 2px solid #444;
+        }
+
+        .hero img {
+            width: 150px;
+            border-radius: 50%;
+            border: 3px solid #66d9ef;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #66d9ef;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #f8f8f2;
+        }
+
+        section {
+            background-color: #282828;
+            color: #f8f8f2;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #bbb;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        .description a {
+            color: #66d9ef;
+            text-decoration: none;
+        }
+
+        .description a:hover {
+            color: #f8d210;
+        }
+
+        .button-container {
+            margin-top: 2rem;
+            color: #343434;
+        }
+
+        .nav-button {
+        background-color: #66d9ef;
+        color: #000 !important; 
+        border: none;
+        padding: 1rem 2rem;
+        margin: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        }
+
+        .nav-button:hover {
+        background-color: #f8d210;
+        }
+
+        .nav-button.link img {
+        margin-right: 8px;
+        vertical-align: middle;
+        }
+
+        footer {
+            background-color: #1e1e1e;
+            text-align: center;
+            padding: 1rem;
+            color: #f8f8f2;
+            margin-top: 2rem;
+            border-top: 2px solid #444;
+        }
+
+        .link img {
+            vertical-align: middle;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
+        .ai-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('images/coding-background.gif') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.1;
+        }
+
+        /* Typing effect */
+        .typing-effect {
+            display: inline-block;
+            font-size: 1.5rem;
+            color: #f8f8f2;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 0.15em solid #f8f8f2;
+            width: 0;
+            animation: typing 3s steps(30) 1s forwards, blink 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        
+        img[alt="GitHub"],
+        img[alt="Google Colab"] {
+            color: #343434; /* Jet black color */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ai-background"></div>
+
+    <header>
+        <div>Naveen Prabakar</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="experience.html">Experience</a>
+            <a href="projects.html">Projects</a>
+            <a href="academics.html">Academics</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <img src="images/image.png" alt="Naveen's Photo">
+        <h1>Welcome to My Portfolio</h1>
+        <p class="typing-effect">Aspiring Backend Developer | AI & Data Enthusiast | Computer Science</p>
+    </div>
+
+    <section>
+        <div class="description">
+            <p>I am a passionate Computer Science student with a focus on backend development, AI, and databases. I thrive on solving problems and implementing solutions that scale. My current work is focused on building AI-powered tools, exploring machine learning, and developing efficient backend systems.</p>
+
+            <p>Feel free to explore my work below:</p>
+            
+            <div class="button-container">
+                <a href="https://github.com/NaveenPrabakar" target="_blank" class="nav-button link">
+                    <img src="images/github-icon.jpg" alt="GitHub"> GitHub
+                </a>
+                <a href="https://colab.research.google.com/drive/1kNhBrTaebo7VoYhWYJsJsq_HpXNnorR8?usp=sharing" target="_blank" class="nav-button link">
+                    <img src="images/colab-icon.jpg" alt="Colab"> Google Colab
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2024 Naveen Prabakar | Built with passion for coding and AI</p>
+    </footer>
+</body>
+</html>
+
+
+
+
+

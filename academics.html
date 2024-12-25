@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academics - Naveen Prabakar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Source Code Pro', monospace; 
+            color: #f0f0f0; 
+            background: #1e1e1e;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0;
+        }
+        header { 
+            background: #282828;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        header a { 
+            color: #66d9ef; 
+            text-decoration: none;
+            margin: 0 1rem; 
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        header a:hover { 
+            color: #f8d210; 
+        }
+
+        .hero { 
+            background-color: #222;
+            color: #f8f8f2;
+            text-align: center;
+            padding: 3rem 1rem;
+            border-bottom: 2px solid #444;
+        }
+
+        .hero img {
+            width: 150px;
+            border-radius: 50%;
+            border: 3px solid #66d9ef;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #66d9ef;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #f8f8f2;
+        }
+
+        section {
+            background-color: #282828;
+            color: #f8f8f2;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .academics-item {
+            background: #444;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .academics-item h3 {
+            font-size: 1.8rem;
+            color: #f8d210;
+            margin-bottom: 0.8rem;
+        }
+
+        .academics-item p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #bbb;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #bbb;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        .description a {
+            color: #66d9ef;
+            text-decoration: none;
+        }
+
+        .description a:hover {
+            color: #f8d210;
+        }
+
+        footer {
+            background-color: #1e1e1e;
+            text-align: center;
+            padding: 1rem;
+            color: #f8f8f2;
+            margin-top: 2rem;
+            border-top: 2px solid #444;
+        }
+
+        .ai-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('images/coding-background.gif') no-repeat center center fixed;
+            background-size: cover;
+            opacity: 0.1;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="ai-background"></div>
+
+    <header>
+        <div>Naveen Prabakar</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="experience.html">Experience</a>
+            <a href="projects.html">Projects</a>
+            <a href="academics.html">Academics</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <img src="images/university.png" alt="Iowa State University">
+        <h1>Academics</h1>
+        <p>Explore my academic journey and current involvements.</p>
+    </section>
+
+    <section>
+        <div class="academics-item">
+            <h3>Bachelor of Science in Computer Science</h3>
+            <p>Iowa State University, Class of 2026</p>
+            <p>Major: Computer Science | Minor: Data Science, Applied AI</p>
+            <p>GPA: 3.81</p>
+        </div>
+
+        <div class="academics-item">
+            <h3>Involvements</h3>
+            <p><strong>AI/ML Club - Backend Lead</strong></p>
+            <p>As the backend lead, I will contribute to the development of AI and machine learning projects this upcoming spring. <a href="https://www.stuorg.iastate.edu/ai-ml-club/officers" target="_blank">Learn more about the club</a></p>
+            <p><strong>Computer Science and Software Engineering Club - Member</strong></p>
+            <p><strong>Chess Club - Member</strong></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2024 Naveen Prabakar | Built with passion for coding and AI</p>
+    </footer>
+
+</body>
+</html>
+
+
