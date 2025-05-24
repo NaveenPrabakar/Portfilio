@@ -4,13 +4,15 @@ import os
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+import openai
 
 
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 loader = PyPDFLoader("resume.pdf")
