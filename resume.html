@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume | Naveen Prabakar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --accent: #ff3366;
+            --dark: #0a0a0a;
+            --light: #ffffff;
+            --gray: #888888;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-dark: rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: var(--glass-dark);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Resume Section */
+        .resume-section {
+            padding: 10rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .resume-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .resume-title {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .resume-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .resume-container {
+            background: var(--glass-dark);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .resume-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+        }
+
+        .resume-embed {
+            width: 100%;
+            height: 800px;
+            border: none;
+            border-radius: 8px;
+            background: var(--light);
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient);
+            color: var(--dark);
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 2rem auto;
+            display: block;
+            width: fit-content;
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .download-button i {
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .resume-title {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .resume-embed {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">Naveen Prabakar</div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="experience.html" class="nav-link">Experience</a>
+                <a href="projects.html" class="nav-link">Projects</a>
+                <a href="academics.html" class="nav-link">Academics</a>
+                <a href="resume.html" class="nav-link">Resume</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="resume-section">
+        <div class="resume-header">
+            <h1 class="resume-title">My Resume</h1>
+            <p class="resume-subtitle">View and download my professional resume</p>
+        </div>
+
+        <div class="resume-container">
+            <iframe src="resume.pdf" class="resume-embed"></iframe>
+        </div>
+
+        <a href="resume.pdf" download class="download-button">
+            <i class="fas fa-download"></i>
+            Download Resume
+        </a>
+    </section>
+
+    <script>
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html> 
