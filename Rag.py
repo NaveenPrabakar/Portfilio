@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -28,6 +29,15 @@ qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=vectorstore.as_retriev
 
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 class QueryRequest(BaseModel):
     query: str
