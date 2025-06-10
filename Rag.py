@@ -69,7 +69,7 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
 
 
 @app.post("/ask")
-def ask_question(request: QueryRequest):
+def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
     response = qa_chain.run(request.query)
     
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
