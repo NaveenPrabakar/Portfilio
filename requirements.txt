@@ -7,4 +7,7 @@ openai
 faiss-cpu
 pypdf
 tiktoken
+boto3
+python-multipart
+aiofiles
 
