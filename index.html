@@ -507,6 +507,105 @@
         .chat-input button:hover {
             transform: scale(1.05);
         }
+
+        /* Recent Work Section */
+        .recent-work {
+            padding: 8rem 2rem;
+            background: var(--glass-dark);
+        }
+
+        .recent-project {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .recent-project-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .recent-project-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .recent-project-title {
+            font-size: 2.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .recent-project-description {
+            color: var(--gray);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .project-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--light);
+        }
+
+        .feature i {
+            font-size: 1.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .project-tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tech-tag {
+            background: var(--glass-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        .recent-project-image {
+            position: relative;
+        }
+
+        .project-architecture {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .recent-project-content {
+                grid-template-columns: 1fr;
+            }
+
+            .recent-project-image {
+                order: -1;
+            }
+
+            .recent-project-title {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -535,6 +634,50 @@
             </div>
             <div class="hero-image float">
                 <img src="images/image.png" alt="Naveen Prabakar">
+            </div>
+        </div>
+    </section>
+
+    <section id="recent-work" class="recent-work">
+        <h2 class="section-title">Recently Worked On</h2>
+        <div class="recent-project">
+            <div class="recent-project-content">
+                <div class="recent-project-text">
+                    <h3 class="recent-project-title">AI-Powered Resume Q&A System</h3>
+                    <p class="recent-project-description">Built a FastAPI-based Question-Answering system that processes PDF documents and provides intelligent responses using OpenAI's GPT. The system features self-learning capabilities through S3 integration and vector embeddings (Check it out, it's the button on the bottom right corner).</p>
+                    <div class="project-features">
+                        <div class="feature">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF Processing & Chunking</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-brain"></i>
+                            <span>GPT-Powered Q&A</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-database"></i>
+                            <span>Vector Embeddings</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-cloud"></i>
+                            <span>S3 Integration</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-robot"></i>
+                            <span>Self-Learning</span>
+                        </div>
+                    </div>
+                    <div class="project-tech-stack">
+                        <span class="tech-tag">FastAPI</span>
+                        <span class="tech-tag">OpenAI GPT</span>
+                        <span class="tech-tag">FAISS</span>
+                        <span class="tech-tag">AWS S3</span>
+                        <span class="tech-tag">Python</span>
+                    </div>
+                </div>
+                <div class="recent-project-image">
+                    <img src="images/resume-qa.png" alt="Resume Q&A System Architecture" class="project-architecture">
+                </div>
             </div>
         </div>
     </section>
