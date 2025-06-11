@@ -43,14 +43,8 @@ docs = text_splitter.split_documents(documents)
 
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
-
-retriever = vectorstore.as_retriever(search_kwargs={
-    "k": 10,  
-    "filter": {"source": {"$in": ["resume", "log"]}}
-})
-
 llm = ChatOpenAI(temperature=0)
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=None)
 
 
 app = FastAPI()
