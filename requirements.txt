@@ -10,4 +10,5 @@ tiktoken
 boto3
 python-multipart
 aiofiles
+pymongo
 
