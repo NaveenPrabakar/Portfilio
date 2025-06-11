@@ -45,8 +45,8 @@ embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 
 retriever = vectorstore.as_retriever(search_kwargs={
-    "k": 5,
-    "filter": {"source": "resume"}  
+    "k": 10,  
+    "filter": {"source": {"$in": ["resume", "log"]}}
 })
 
 llm = ChatOpenAI(temperature=0)
@@ -113,7 +113,15 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
 
 @app.post("/ask")
 def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
-    response = qa_chain.run(request.query)
+
+    resume_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
+    log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
+
+    combined_docs = resume_docs + log_docs  
+    response = qa_chain.combine_documents_chain.run({
+        "input_documents": combined_docs,
+        "question": request.query
+    })
     
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
 
