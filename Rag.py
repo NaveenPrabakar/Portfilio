@@ -34,14 +34,23 @@ s3_client = boto3.client("s3")
 
 loader = PyPDFLoader("resume.pdf")
 documents = loader.load()
+for doc in documents:
+    doc.metadata["source"] = "resume"
+    
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 docs = text_splitter.split_documents(documents)
 
 
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
+
+retriever = vectorstore.as_retriever(search_kwargs={
+    "k": 5,
+    "filter": {"source": "resume"}  
+})
+
 llm = ChatOpenAI(temperature=0)
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=vectorstore.as_retriever())
+qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 
 
 app = FastAPI()
@@ -95,6 +104,10 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
     loader = TextLoader(local_path)
     new_docs = loader.load()
     new_splits = text_splitter.split_documents(new_docs)
+
+    for doc in new_splits:
+        doc.metadata["source"] = "log"
+        
     vectorstore.add_documents(new_splits)
 
 
