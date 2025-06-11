@@ -458,6 +458,33 @@
             gap: 1rem;
         }
 
+        .typing-indicator {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.8rem 1rem;
+            background: var(--gradient);
+            border-radius: 12px;
+            width: fit-content;
+            margin: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--dark);
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
         .message {
             max-width: 80%;
             padding: 0.8rem 1rem;
@@ -644,7 +671,7 @@
             <div class="recent-project-content">
                 <div class="recent-project-text">
                     <h3 class="recent-project-title">AI-Powered Resume Q&A System</h3>
-                    <p class="recent-project-description">Built a FastAPI-based Question-Answering system that processes PDF documents and provides intelligent responses using OpenAI's GPT. The system features self-learning capabilities through S3 integration and vector embeddings (Check it out, it's the button on the bottom right corner).</p>
+                    <p class="recent-project-description">Built a FastAPI-based Question-Answering system that processes PDF documents and provides intelligent responses using OpenAI's GPT. The system features self-learning capabilities through S3 integration and vector embeddings and a log management system through MongoDB. (Check it out, it's the button on the bottom right corner).</p>
                     <div class="project-features">
                         <div class="feature">
                             <i class="fas fa-file-pdf"></i>
@@ -665,6 +692,10 @@
                         <div class="feature">
                             <i class="fas fa-robot"></i>
                             <span>Self-Learning</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-database"></i>
+                            <span>MongoDB Log Management</span>
                         </div>
                     </div>
                     <div class="project-tech-stack">
@@ -856,6 +887,16 @@
             // Clear input
             chatInput.value = '';
 
+            // Add typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingIndicator);
+
             // Scroll to bottom
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -871,6 +912,9 @@
 
                 const data = await response.json();
 
+                // Remove typing indicator
+                typingIndicator.remove();
+
                 // Add bot response to chat
                 const botMessageDiv = document.createElement('div');
                 botMessageDiv.className = 'message bot-message';
@@ -881,6 +925,9 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             } catch (error) {
                 console.error('Error:', error);
+                // Remove typing indicator
+                typingIndicator.remove();
+                
                 const errorMessageDiv = document.createElement('div');
                 errorMessageDiv.className = 'message bot-message';
                 errorMessageDiv.textContent = 'Sorry, I encountered an error. Please try again.';
