@@ -113,7 +113,7 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
     log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
 
     combined_docs = resume_docs + log_docs  
-    response = qa_chain.run(input_documents=combined_docs, question=query)
+    response = qa_chain.run(input_documents=combined_docs, question= request.query)
     
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
 
