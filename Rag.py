@@ -15,7 +15,6 @@ from langchain.chains import RetrievalQA
 import openai
 from pymongo import MongoClient
 from langchain.chains.question_answering import load_qa_chain
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 
 
@@ -42,30 +41,11 @@ for doc in documents:
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 docs = text_splitter.split_documents(documents)
 
-system_message = SystemMessagePromptTemplate.from_template(
-    "You are Naveen's assistant. Only answer questions about him using the provided context. If unsure, respond professionally"
-)
-
-human_message = HumanMessagePromptTemplate.from_template(
-    "Use the following context to answer the question:\n{context}\n\nQuestion: {query}"
-)
-
-prompt = ChatPromptTemplate.from_messages([
-    system_message,
-    human_message
-])
 
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 llm = ChatOpenAI(temperature=0)
-
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=vectorstore.as_retriever(search_type="similarity"),
-    chain_type="stuff",
-    chain_type_kwargs={"prompt": prompt}
-)
-
+qa_chain = load_qa_chain(llm=llm, chain_type="stuff")
 
 
 app = FastAPI()
@@ -133,7 +113,7 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
     log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
 
     combined_docs = resume_docs + log_docs  
-    response = qa_chain.run(input_documents=combined_docs, query=request.query)
+    response = qa_chain.run(input_documents=combined_docs, question= request.query)
     
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
 
