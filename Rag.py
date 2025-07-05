@@ -15,6 +15,7 @@ from langchain.chains import RetrievalQA
 import openai
 from pymongo import MongoClient
 from langchain.chains.question_answering import load_qa_chain
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 
 
@@ -41,11 +42,30 @@ for doc in documents:
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 docs = text_splitter.split_documents(documents)
 
+system_message = SystemMessagePromptTemplate.from_template(
+    "You are Naveen's assistant. Only answer questions about him using the provided context. If unsure, respond professionally"
+)
+
+human_message = HumanMessagePromptTemplate.from_template(
+    "Use the following context to answer the question:\n{context}\n\nQuestion: {question}"
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    system_message,
+    human_message
+])
 
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 llm = ChatOpenAI(temperature=0)
-qa_chain = load_qa_chain(llm=llm, chain_type="stuff")
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=vectorstore.as_retriever(search_type="similarity"),
+    chain_type="stuff",
+    chain_type_kwargs={"prompt": prompt}
+)
+
 
 
 app = FastAPI()
