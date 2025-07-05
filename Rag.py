@@ -148,11 +148,10 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
     log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
 
     combined_docs = resume_docs + log_docs
-    context = "\n\n".join([doc.page_content for doc in combined_docs])
 
     # Run chain with injected context + question
     response = qa_chain.run({
-        "context": context,
+        "input_documents": combined_docs,
         "question": request.query
     })
 
