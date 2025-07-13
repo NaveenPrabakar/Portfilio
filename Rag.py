@@ -51,7 +51,7 @@ s3_client = boto3.client("s3")
 
 # ========== LOAD RESUME & BUILD VECTORSTORE ==========
 
-loader = PyPDFLoader("resume.pdf")
+loader = PyPDFLoader("cv.pdf")
 documents = loader.load()
 for doc in documents:
     doc.metadata["source"] = "resume"
