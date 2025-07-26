@@ -24,7 +24,7 @@ from pymongo import MongoClient
 
 system_prompt = (
     "You are a career assistant who gives helpful, concise answers about Naveen Prabakar "
-    "based on his resume and prior questions. Any irrelevant question asked should be dismissed professionally."
+    "Any irrelevant question asked should be dismissed professionally."
 )
 
 system_msg = SystemMessagePromptTemplate.from_template(system_prompt)
@@ -94,8 +94,18 @@ async def attach_session_id(request: Request, call_next):
     session_id = request.cookies.get("session_id")
     if not session_id:
         session_id = str(uuid4())
+
     response = await call_next(request)
-    response.set_cookie("session_id", session_id)
+
+    response.set_cookie(
+        key="session_id",
+        value=session_id,
+        max_age=SESSION_TTL_SECONDS,
+        httponly=True,         
+        secure=True,           
+        samesite="none",       
+        path="/"
+    )
     return response
 
 class QueryRequest(BaseModel):
