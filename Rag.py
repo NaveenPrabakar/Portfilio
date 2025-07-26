@@ -1,13 +1,11 @@
-from fastapi import FastAPI, BackgroundTasks, Request
+from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import os
 from fastapi.middleware.cors import CORSMiddleware
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
-import redis
-import json
-from uuid import uuid4
+
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -24,7 +22,7 @@ from pymongo import MongoClient
 
 system_prompt = (
     "You are a career assistant who gives helpful, concise answers about Naveen Prabakar "
-    "Any irrelevant question asked should be dismissed professionally."
+    "based on his resume and prior questions. Any irrelevant question asked should be dismissed professionally."
 )
 
 system_msg = SystemMessagePromptTemplate.from_template(system_prompt)
@@ -51,14 +49,6 @@ s3_bucket = os.getenv("S3_BUCKET_NAME")
 s3_client = boto3.client("s3")
 
 
-redis_url = os.getenv("REDIS_URL")
-if not redis_url:
-    raise ValueError("REDIS_URL not set in environment")
-
-redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
-SESSION_TTL_SECONDS = 600  # 10 minutes
-
-
 # ========== LOAD RESUME & BUILD VECTORSTORE ==========
 
 loader = PyPDFLoader("cv.pdf")
@@ -83,30 +73,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://naveenprabakar.github.io"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.middleware("http")
-async def attach_session_id(request: Request, call_next):
-    session_id = request.cookies.get("session_id")
-    if not session_id:
-        session_id = str(uuid4())
-
-    response = await call_next(request)
-
-    response.set_cookie(
-        key="session_id",
-        value=session_id,
-        max_age=SESSION_TTL_SECONDS,
-        httponly=True,         
-        secure=True,           
-        samesite="none",       
-        path="/"
-    )
-    return response
 
 class QueryRequest(BaseModel):
     query: str
@@ -171,56 +142,20 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
 # ========== MAIN Q&A ENDPOINT ==========
 
 @app.post("/ask")
-def ask_question(request: QueryRequest, background_tasks: BackgroundTasks, http_request: Request):
-
-    session_id = http_request.cookies.get("session_id")
-    redis_key = f"session:{session_id}"
-
-   
-    history_json = redis_client.lrange(redis_key, 0, -1)
-    history = [json.loads(msg) for msg in history_json]
-
-    
-    history.append({"role": "user", "content": request.query})
-    trimmed_history = history[-5:]  # last 5 messages
-
-   
-    redis_client.delete(redis_key)
-    for msg in trimmed_history:
-        redis_client.rpush(redis_key, json.dumps(msg))
-    redis_client.expire(redis_key, SESSION_TTL_SECONDS)
-
-    
-    conversational_context = ""
-    for msg in trimmed_history:
-        role = "User" if msg["role"] == "user" else "Assistant"
-        conversational_context += f"{role}: {msg['content']}\n"
-    
+def ask_question(request: QueryRequest, background_tasks: BackgroundTasks):
     # Search relevant documents
-    combined_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
+    resume_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
+    log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
 
-    injected_question = f"{conversational_context}User: {request.query}"
+    combined_docs = resume_docs + log_docs
 
     # Run chain with injected context + question
     response = qa_chain.run({
         "input_documents": combined_docs,
-        "question": injected_question 
+        "question": request.query
     })
 
-    redis_client.rpush(redis_key, json.dumps({"role": "assistant", "content": response}))
-    redis_client.expire(redis_key, SESSION_TTL_SECONDS)
-
     # Background log task
-
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
 
-    cleaned_response = response.replace("User:", "").replace("Assistant:", "").strip()
-
-    return {"answer": cleaned_response}
-
-@app.post("/clear_session")
-def clear_session(http_request: Request):
-    session_id = http_request.cookies.get("session_id")
-    redis_key = f"session:{session_id}"
-    redis_client.delete(redis_key)
-    return {"message": "Session memory cleared."}
+    return {"answer": response}
