@@ -71,7 +71,7 @@ embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 
 # Initialize LLM and QA chain
-llm = ChatOpenAI(temperature=0)
+llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
 qa_chain = load_qa_chain(llm=llm, chain_type="stuff", prompt=chat_prompt)
 
 # ========== FASTAPI SETUP ==========
