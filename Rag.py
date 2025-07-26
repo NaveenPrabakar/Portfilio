@@ -207,7 +207,9 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks, http_
 
     background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
 
-    return {"answer": response}
+    cleaned_response = response.replace("User:", "").replace("Assistant:", "").strip()
+
+    return {"answer": cleaned_response}
 
 @app.post("/clear_session")
 def clear_session(http_request: Request):
