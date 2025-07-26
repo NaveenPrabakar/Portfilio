@@ -29,10 +29,10 @@ system_prompt = (
 
 system_msg = SystemMessagePromptTemplate.from_template(system_prompt)
 
-# 🔧 Inject both question and context into the prompt
 human_msg = HumanMessagePromptTemplate.from_template(
-    "Given the following context:\n{context}\n\nAnswer the question:\n{question}"
+    "Here is the chat history so far:\n{context}\n\nNow answer the user's latest question:\n{question}"
 )
+
 chat_prompt = ChatPromptTemplate.from_messages([system_msg, human_msg])
 
 
@@ -214,4 +214,4 @@ def clear_session(http_request: Request):
     session_id = http_request.cookies.get("session_id")
     redis_key = f"session:{session_id}"
     redis_client.delete(redis_key)
-    return {"message": "Session memory cleared."}
+    return {"message": "Session memory cleared."}, everything good to go ?
