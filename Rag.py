@@ -187,10 +187,7 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks, http_
         conversational_context += f"{role}: {msg['content']}\n"
     
     # Search relevant documents
-    resume_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
-    log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
-
-    combined_docs = resume_docs + log_docs
+    combined_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
 
     injected_question = f"{conversational_context}User: {request.query}"
 
