@@ -8,6 +8,7 @@ from datetime import datetime
 import redis
 import json
 from uuid import uuid4
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -63,7 +64,11 @@ for doc in documents:
     doc.metadata["source"] = "resume"
 
 # Split resume into manageable chunks
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=800,
+    chunk_overlap=100,
+    separators=["\n\n", "\n", ".", " "]
+)
 docs = text_splitter.split_documents(documents)
 
 # Embed chunks into FAISS vector store
@@ -181,8 +186,8 @@ def ask_question(request: QueryRequest, background_tasks: BackgroundTasks, http_
         conversational_context += f"{role}: {msg['content']}\n"
 
     # Search for relevant resume and log documents
-    resume_docs = vectorstore.similarity_search(request.query, k=4, filter={"source": "resume"})
-    log_docs = vectorstore.similarity_search(request.query, k=1, filter={"source": "log"})
+    resume_docs = vectorstore.max_marginal_relevance_search(request.query, k=8, lambda_mult=0.5, filter={"source": "resume"})
+    log_docs = vectorstore.similarity_search(request.query, k=2, filter={"source": "log"})
     combined_docs = resume_docs + log_docs
 
     # Inject full chat into question for prompt
