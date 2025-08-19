@@ -449,6 +449,42 @@
         <div class="projects-container">
             <div class="project-grid">
                 <div class="project-item fade-in">
+                    <img src="images/crypto-dashboard.png" alt="Crypto Dashboard — Real-Time Cryptocurrency Analytics" class="project-image">
+                    <div class="project-content">
+                      <h3 class="project-title">Crypto Dashboard — Real-Time Cryptocurrency Analytics</h3>
+                      <div class="project-date">July 2025 - Current</div>
+                      <p class="project-description">
+                        Built a full-stack, cloud-deployed crypto analytics platform delivering live market monitoring, advanced statistical insights, AI-assisted querying, and automated PDF reporting with email subscriptions. Frontend on Vercel, Go microservices on Render, Cassandra (AstraDB) for time-series storage, and an EC2 ingestion worker keep the pipeline real-time and resilient. 
+                      </p>
+                      <ul class="project-list">
+                        <li>Implemented React + TypeScript dashboard with real-time charts and responsive UI, deployed via Vercel CI/CD. </li>
+                        <li>Developed Go services for ingestion, analytics, reporting, and AI endpoints; exposed REST APIs for <code>/latest</code>, <code>/history</code>, <code>/average</code>, <code>/range</code>, and <code>/trend</code>. </li>
+                        <li>Designed Cassandra/AstraDB schema optimized for time-series crypto prices and subscriber/verification workflows. </li>
+                        <li>Scheduled CoinGecko data fetcher as an EC2 <code>systemd</code> service with CloudWatch monitoring; backend hosted on Render with health checks. </li>
+                        <li>Added AI features: natural-language → CQL translation and daily report summaries using GPT. </li>
+                        <li>Automated multi-page PDF generation (charts via gonum/plot, min/max/avg/volatility tables) and email delivery to subscribers. </li>
+                      </ul>
+                      <div class="project-skills">
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">TypeScript</span>
+                        <span class="skill-tag">Go</span>
+                        <span class="skill-tag">Cassandra</span>
+                        <span class="skill-tag">OpenAI GPT</span>
+                        <span class="skill-tag">AWS EC2</span>
+                        <span class="skill-tag">Docker</span>
+                      </div>
+                      <div class="project-links">
+                        <a href="https://github.com/NaveenPrabakar/Crypto-Dashboard" class="project-link" target="_blank">
+                          <i class="fab fa-github"></i> GitHub
+                        </a> 
+                        <a href="Documents/Crypto_DashBoard.pdf" class="project-link" target="_blank">
+                          <i class="fas fa-file-pdf"></i> Technical Report
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  
+                <div class="project-item fade-in">
                     <img src="images\resume-qa.png" alt="AI-Powered Resume Q&A System" class="project-image">
                     <div class="project-content">
                         <h3 class="project-title">AI-Powered Resume Q&A System</h3>
