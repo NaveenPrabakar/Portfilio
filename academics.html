@@ -255,6 +255,41 @@
             transform: scale(1.05);
         }
 
+        /* Transcript Section Styles */
+        .transcript-embed {
+            width: 100%;
+            height: 800px;
+            border: none;
+            border-radius: 8px;
+            background: var(--light);
+            margin: 1.5rem 0;
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient);
+            color: var(--dark);
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 2rem auto;
+            display: block;
+            width: fit-content;
+        }
+
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .download-button i {
+            font-size: 1.2rem;
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -273,6 +308,10 @@
 
             .academics-item {
                 padding: 1.5rem;
+            }
+
+            .transcript-embed {
+                height: 600px;
             }
 
             .nav-links {
@@ -378,6 +417,26 @@
                         </a>
                     </li>
                 </ul>
+            </div>
+
+            <!-- Official Transcript -->
+            <div class="academics-item fade-in">
+                <h3 class="academics-title">Official Transcript</h3>
+                <div class="academics-subtitle">
+                    <i class="fas fa-file-alt"></i> Iowa State University Academic Record
+                </div>
+                <div class="academics-details">
+                    <p>View my complete academic transcript from Iowa State University, including all completed courses, grades, and academic achievements.</p>
+                    <p><strong>Current Status:</strong> Bachelor of Science in Computer Science (Expected Graduation: May 2026)</p>
+                    <p><strong>Overall GPA:</strong> 3.85/4.0</p>
+                </div>
+                
+                <iframe src="transcript.pdf" class="transcript-embed"></iframe>
+                
+                <a href="transcript.pdf" download class="download-button">
+                    <i class="fas fa-download"></i>
+                    Download Transcript
+                </a>
             </div>
         </div>
     </section>
