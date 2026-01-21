@@ -8,35 +8,33 @@ from datetime import datetime
 import redis
 import json
 from uuid import uuid4
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_community.chat_models import ChatOpenAI
-from langchain.chains.question_answering import load_qa_chain
-from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 import openai
 from pymongo import MongoClient
 
-# ========== SYSTEM PROMPT SETUP ==========
+# ====== LangChain & LLM Imports ======
+from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_community.chat_models import ChatOpenAI
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
+# ====== SYSTEM PROMPT SETUP ======
 system_prompt = (
     "You are a career assistant who gives helpful, concise answers about Naveen Prabakar "
     "based on his resume and prior questions. Any irrelevant question asked should be dismissed professionally."
 )
 system_msg = SystemMessagePromptTemplate.from_template(system_prompt)
 
-# Updated human message to explicitly show chat history
 human_msg = HumanMessagePromptTemplate.from_template(
     "Here is the chat history so far:\n{context}\n\nNow answer the user's latest question:\n{question}"
 )
 
-# Combine into one chat prompt
 chat_prompt = ChatPromptTemplate.from_messages([system_msg, human_msg])
 
-# ========== ENVIRONMENT SETUP ==========
-
+# ====== ENVIRONMENT SETUP ======
 mongo_uri = os.getenv("MONGODB_ATLAS_URI")
 mongo_db = "qna_logs"
 mongo_collection = "qa_archive"
@@ -56,14 +54,12 @@ redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
 
 SESSION_TTL_SECONDS = 600  # 10 minutes
 
-# ========== LOAD RESUME & BUILD VECTORSTORE ==========
-
+# ====== LOAD RESUME & BUILD VECTORSTORE ======
 loader = PyPDFLoader("cv.pdf")
 documents = loader.load()
 for doc in documents:
     doc.metadata["source"] = "resume"
 
-# Split resume into manageable chunks
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
     chunk_overlap=100,
@@ -71,28 +67,30 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 docs = text_splitter.split_documents(documents)
 
-# Embed chunks into FAISS vector store
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 
-# Initialize LLM and QA chain
+# ====== BUILD LLM + NEW CHAIN API ======
 llm = ChatOpenAI(temperature=0, model_name="gpt-4o")
-qa_chain = load_qa_chain(llm=llm, chain_type="stuff", prompt=chat_prompt)
 
-# ========== FASTAPI SETUP ==========
+# The “stuff” document combination chain (replaces load_qa_chain)
+document_chain = create_stuff_documents_chain(llm, chat_prompt)
 
+# Build retrieval-based chain using FAISS retriever
+retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+qa_chain = create_retrieval_chain(retriever, document_chain)
+
+# ====== FASTAPI SETUP ======
 app = FastAPI()
 
-# Allow frontend access via CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Consider locking this down in production
+    allow_origins=["*"],  # Consider limiting for prod
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Attach session ID via cookie to each user
 @app.middleware("http")
 async def attach_session_id(request: Request, call_next):
     session_id = request.cookies.get("session_id")
@@ -102,55 +100,44 @@ async def attach_session_id(request: Request, call_next):
     response.set_cookie("session_id", session_id)
     return response
 
-# Request schema
 class QueryRequest(BaseModel):
     query: str
 
-# ========== BACKGROUND TASK TO LOG TO S3 AND RE-EMBED ==========
-
+# ====== BACKGROUND TASK: LOG TO S3 + RE-EMBED ======
 def log_to_s3_and_update_embeddings(question: str, answer: str):
     filename = "q&a.txt"
     local_path = f"/tmp/{filename}"
 
-    # Download existing log or create new
     try:
         s3_client.download_file(s3_bucket, filename, local_path)
     except ClientError as e:
-        if e.response['Error']['Code'] == '404':
-            open(local_path, "w").close()  # Create empty file
+        if e.response["Error"]["Code"] == "404":
+            open(local_path, "w").close()
         else:
             raise
 
-    # Parse Q&A pairs
     with open(local_path, "r") as f:
         content = f.read().strip()
         qna_pairs = content.split("\n\n") if content else []
 
-    # Offload oldest entries to MongoDB if needed
     if len(qna_pairs) >= 10:
         to_offload = qna_pairs[:8]
         remaining = qna_pairs[8:]
         for entry in to_offload:
             lines = entry.split("\n")
-            q, a = lines[0].replace("Question: ", ""), lines[1].replace("Answer: ", "")
-            collection.insert_one({
-                "question": q,
-                "answer": a,
-                "archived_at": datetime.utcnow()
-            })
+            q = lines[0].replace("Question: ", "")
+            a = lines[1].replace("Answer: ", "")
+            collection.insert_one({"question": q, "answer": a, "archived_at": datetime.utcnow()})
         with open(local_path, "w") as f:
             f.write("\n\n".join(remaining))
 
-    # Append new entry
     with open(local_path, "a") as f:
         f.write(f"Question: {question}\n")
         f.write(f"Answer: {answer}\n\n")
 
-    # Upload back to S3
     with open(local_path, "rb") as f:
         s3_client.upload_fileobj(f, s3_bucket, filename)
 
-    # Re-embed new log content
     loader = TextLoader(local_path)
     new_docs = loader.load()
     new_splits = text_splitter.split_documents(new_docs)
@@ -158,58 +145,42 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
         doc.metadata["source"] = "log"
     vectorstore.add_documents(new_splits)
 
-# ========== MAIN Q&A ENDPOINT ==========
-
+# ====== MAIN Q&A ENDPOINT ======
 @app.post("/ask")
 def ask_question(request: QueryRequest, background_tasks: BackgroundTasks, http_request: Request):
 
-    # Retrieve session-based chat history from Redis
     session_id = http_request.cookies.get("session_id")
     redis_key = f"session:{session_id}"
     history_json = redis_client.lrange(redis_key, 0, -1)
     history = [json.loads(msg) for msg in history_json]
 
-    # Add new user message and keep only last 5
     history.append({"role": "user", "content": request.query})
     trimmed_history = history[-5:]
 
-    # Save updated history back to Redis
     redis_client.delete(redis_key)
     for msg in trimmed_history:
         redis_client.rpush(redis_key, json.dumps(msg))
     redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
-    # Format conversational context
     conversational_context = ""
     for msg in trimmed_history:
         role = "User" if msg["role"] == "user" else "Assistant"
         conversational_context += f"{role}: {msg['content']}\n"
 
-    # Search for relevant resume and log documents
-    resume_docs = vectorstore.max_marginal_relevance_search(request.query, k=8, lambda_mult=0.5, filter={"source": "resume"})
-    log_docs = vectorstore.similarity_search(request.query, k=2, filter={"source": "log"})
-    combined_docs = resume_docs + log_docs
-
-    # Inject full chat into question for prompt
     injected_question = f"{conversational_context}User: {request.query}"
 
-    # Generate response via QA chain
-    response = qa_chain.run({
-        "input_documents": combined_docs,
-        "question": injected_question
-    })
+    response = qa_chain.invoke({"input": injected_question})
 
-    # Store assistant response
-    redis_client.rpush(redis_key, json.dumps({"role": "assistant", "content": response}))
+    answer = response["answer"] if "answer" in response else str(response)
+
+    redis_client.rpush(redis_key, json.dumps({"role": "assistant", "content": answer}))
     redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
-    # Log Q&A in background
-    background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, response)
+    background_tasks.add_task(log_to_s3_and_update_embeddings, request.query, answer)
 
-    return {"answer": response}
+    return {"answer": answer}
 
-# ========== SESSION CLEARING ENDPOINT ==========
-
+# ====== CLEAR SESSION ENDPOINT ======
 @app.post("/clear_session")
 def clear_session(http_request: Request):
     session_id = http_request.cookies.get("session_id")

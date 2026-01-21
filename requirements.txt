@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-langchain
+langchain>=1.0.0
 langchain-community
 langchain-openai
+langchain-text-splitters
 openai
 faiss-cpu
 pypdf
