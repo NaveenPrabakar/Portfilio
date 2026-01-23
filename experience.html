@@ -21,8 +21,11 @@
         --light: #ffffff;
         --gray: #888888;
         --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
-        --glass: rgba(255, 255, 255, 0.1);
-        --glass-dark: rgba(0, 0, 0, 0.8);
+        --gradient-alt: linear-gradient(135deg, #ff3366, #ff8833);
+        --glass: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-dark: rgba(0, 0, 0, 0.6);
+        --shadow: 0 8px 32px rgba(0, 255, 136, 0.1);
       }
 
       * {
@@ -37,17 +40,39 @@
         color: var(--light);
         line-height: 1.6;
         overflow-x: hidden;
+        position: relative;
       }
 
-      .image-container {
-        display: flex;
-        align-items: center; /* vertical alignment */
-        gap: 16px; /* space between images */
+      /* Animated Background */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 20% 50%,
+          rgba(0, 255, 136, 0.05) 0%,
+          transparent 50%
+        ),
+        radial-gradient(
+          circle at 80% 80%,
+          rgba(0, 204, 255, 0.05) 0%,
+          transparent 50%
+        );
+        z-index: -1;
+        animation: pulse 15s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
       }
 
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
       }
 
       ::-webkit-scrollbar-track {
@@ -55,8 +80,12 @@
       }
 
       ::-webkit-scrollbar-thumb {
-        background: var(--primary);
-        border-radius: 4px;
+        background: var(--gradient);
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary);
       }
 
       /* Navigation */
@@ -65,13 +94,15 @@
         top: 0;
         width: 100%;
         z-index: 1000;
-        padding: 1.5rem;
+        padding: 1.5rem 2rem;
         transition: all 0.3s ease;
       }
 
       .navbar.scrolled {
-        background: var(--glass-dark);
-        backdrop-filter: blur(10px);
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid var(--glass-border);
       }
 
       .nav-content {
@@ -89,11 +120,16 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .logo:hover {
+        transform: scale(1.05);
       }
 
       .nav-links {
         display: flex;
-        gap: 2rem;
+        gap: 2.5rem;
       }
 
       .nav-link {
@@ -102,6 +138,7 @@
         font-weight: 500;
         position: relative;
         padding: 0.5rem 0;
+        transition: color 0.3s ease;
       }
 
       .nav-link::after {
@@ -115,169 +152,58 @@
         transition: width 0.3s ease;
       }
 
+      .nav-link:hover {
+        color: var(--primary);
+      }
+
       .nav-link:hover::after {
         width: 100%;
       }
 
       /* Page Header */
       .page-header {
-        padding: 10rem 2rem 4rem;
+        padding: 12rem 2rem 6rem;
         text-align: center;
         position: relative;
         overflow: hidden;
       }
 
+      .page-header::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(0, 255, 136, 0.1) 0%,
+          transparent 70%
+        );
+        animation: rotate 20s linear infinite;
+      }
+
+      @keyframes rotate {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+
       .page-title {
-        font-size: 3.5rem;
+        font-size: 4rem;
         margin-bottom: 1.5rem;
         background: var(--gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-      }
-
-      .page-subtitle {
-        font-size: 1.2rem;
-        color: var(--gray);
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      /* Experience Section */
-      .experience-section {
-        padding: 4rem 2rem;
-      }
-
-      .experience-container {
-        max-width: 1000px;
-        margin: 0 auto;
-      }
-
-      .experience-item {
-        background: var(--glass-dark);
-        border-radius: 16px;
-        padding: 2.5rem;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
         position: relative;
-        overflow: hidden;
+        z-index: 1;
+        animation: slideDown 0.8s ease;
       }
 
-      .experience-item::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--gradient);
-      }
-
-      .experience-item:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
-      }
-
-      .experience-title {
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
-        color: var(--primary);
-      }
-
-      .experience-company {
-        font-size: 1.2rem;
-        color: var(--secondary);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-      }
-
-      .experience-company i {
-        margin-right: 0.5rem;
-      }
-
-      .experience-date {
-        font-size: 0.9rem;
-        color: var(--gray);
-        margin-bottom: 1.5rem;
-        display: inline-block;
-        background: var(--glass);
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-      }
-
-      .experience-description {
-        color: var(--light);
-        margin-bottom: 1.5rem;
-        line-height: 1.8;
-      }
-
-      .experience-list {
-        list-style-type: none;
-        margin-bottom: 1.5rem;
-      }
-
-      .experience-list li {
-        margin-bottom: 0.8rem;
-        padding-left: 1.5rem;
-        position: relative;
-        color: var(--light);
-      }
-
-      .experience-list li::before {
-        content: "▹";
-        position: absolute;
-        left: 0;
-        color: var(--primary);
-      }
-
-      .experience-link {
-        color: var(--primary);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-      }
-
-      .experience-link:hover {
-        color: var(--secondary);
-      }
-
-      .experience-link i {
-        margin-left: 0.5rem;
-        transition: transform 0.3s ease;
-      }
-
-      .experience-link:hover i {
-        transform: translateX(5px);
-      }
-
-      .image-container {
-        margin: 1.5rem 0;
-        border-radius: 12px;
-        overflow: hidden;
-        background: var(--glass);
-        padding: 1rem;
-      }
-
-      .image-container img {
-        width: 100%;
-        max-width: 300px;
-        height: auto;
-        display: block;
-        margin: 0 auto;
-        transition: all 0.3s ease;
-      }
-
-      .image-container:hover img {
-        transform: scale(1.05);
-      }
-
-      /* Animations */
-      @keyframes fadeIn {
+      @keyframes slideDown {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateY(-30px);
         }
         to {
           opacity: 1;
@@ -285,26 +211,365 @@
         }
       }
 
-      .fade-in {
-        animation: fadeIn 1s ease forwards;
+      .page-subtitle {
+        font-size: 1.3rem;
+        color: var(--gray);
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+        animation: slideUp 0.8s ease 0.2s backwards;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Timeline */
+      .experience-section {
+        padding: 4rem 2rem 8rem;
+        position: relative;
+      }
+
+      .experience-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      /* Vertical Timeline Line */
+      .experience-container::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          var(--primary) 10%,
+          var(--primary) 90%,
+          transparent
+        );
+        transform: translateX(-50%);
+      }
+
+      .experience-item {
+        background: var(--glass-dark);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 3rem;
+        margin-bottom: 4rem;
+        position: relative;
+        backdrop-filter: blur(10px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        width: calc(50% - 3rem);
+      }
+
+      .experience-item:nth-child(odd) {
+        margin-left: 0;
+        margin-right: auto;
+      }
+
+      .experience-item:nth-child(even) {
+        margin-left: auto;
+        margin-right: 0;
+      }
+
+      /* Timeline Dots */
+      .experience-item::after {
+        content: "";
+        position: absolute;
+        top: 3rem;
+        width: 20px;
+        height: 20px;
+        background: var(--gradient);
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        z-index: 10;
+      }
+
+      .experience-item:nth-child(odd)::after {
+        right: -62px;
+      }
+
+      .experience-item:nth-child(even)::after {
+        left: -62px;
+      }
+
+      /* Accent Border */
+      .experience-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--gradient);
+        border-radius: 20px 20px 0 0;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+
+      .experience-item:hover::before {
+        opacity: 1;
+      }
+
+      .experience-item:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 255, 136, 0.2);
+        border-color: var(--primary);
+      }
+
+      .experience-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .experience-title {
+        font-size: 2rem;
+        color: var(--light);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .experience-company {
+        font-size: 1.3rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+      }
+
+      .experience-company i {
+        font-size: 1.1rem;
+      }
+
+      .experience-date {
+        font-size: 0.95rem;
+        color: var(--gray);
+        background: var(--glass);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        border: 1px solid var(--glass-border);
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      .experience-description {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
+        line-height: 1.8;
+        font-size: 1.05rem;
+      }
+
+      .experience-list {
+        list-style-type: none;
+        margin-bottom: 2rem;
+      }
+
+      .experience-list li {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+        position: relative;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.7;
+        transition: all 0.3s ease;
+      }
+
+      .experience-list li::before {
+        content: "▹";
+        position: absolute;
+        left: 0;
+        color: var(--primary);
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+      }
+
+      .experience-list li:hover {
+        color: var(--light);
+        padding-left: 2.3rem;
+      }
+
+      .experience-list li:hover::before {
+        transform: translateX(5px);
+      }
+
+      .experience-list li b {
+        color: var(--secondary);
+        font-weight: 600;
+      }
+
+      .image-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        margin: 2rem 0 1.5rem;
+        padding: 1.5rem;
+        background: var(--glass);
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        flex-wrap: wrap;
+      }
+
+      .image-container img {
+        max-width: 200px;
+        height: auto;
+        border-radius: 12px;
+        transition: all 0.4s ease;
+        filter: grayscale(0.3);
+      }
+
+      .image-container img:hover {
+        transform: scale(1.1) rotate(2deg);
+        filter: grayscale(0);
+        box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+      }
+
+      .experience-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: var(--glass);
+        border-radius: 30px;
+        border: 1px solid var(--glass-border);
+      }
+
+      .experience-link:hover {
+        background: var(--primary);
+        color: var(--dark);
+        transform: translateX(5px);
+        box-shadow: 0 5px 20px rgba(0, 255, 136, 0.3);
+      }
+
+      .experience-link i {
+        transition: transform 0.3s ease;
+      }
+
+      .experience-link:hover i {
+        transform: translateX(5px);
+      }
+
+      /* Tags */
+      .tech-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+      }
+
+      .tech-tag {
+        background: var(--glass);
+        color: var(--secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+      }
+
+      .tech-tag:hover {
+        background: var(--secondary);
+        color: var(--dark);
+        transform: translateY(-2px);
       }
 
       /* Responsive Design */
-      @media (max-width: 768px) {
-        .page-title {
-          font-size: 2.5rem;
+      @media (max-width: 1024px) {
+        .experience-container::before {
+          left: 30px;
         }
 
         .experience-item {
-          padding: 1.5rem;
+          width: calc(100% - 80px);
+          margin-left: 80px !important;
+        }
+
+        .experience-item:nth-child(odd)::after,
+        .experience-item:nth-child(even)::after {
+          left: -62px;
+          right: auto;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .page-title {
+          font-size: 2.8rem;
+        }
+
+        .page-subtitle {
+          font-size: 1.1rem;
         }
 
         .nav-links {
           display: none;
         }
 
-        .mobile-menu {
-          display: block;
+        .experience-container::before {
+          display: none;
+        }
+
+        .experience-item {
+          width: 100%;
+          margin-left: 0 !important;
+          padding: 2rem;
+        }
+
+        .experience-item::after {
+          display: none;
+        }
+
+        .experience-title {
+          font-size: 1.6rem;
+        }
+
+        .experience-company {
+          font-size: 1.1rem;
+        }
+
+        .image-container {
+          gap: 1rem;
+        }
+
+        .image-container img {
+          max-width: 150px;
+        }
+      }
+
+      /* Fade In Animation */
+      .fade-in {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease forwards;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
     </style>
@@ -333,20 +598,22 @@
 
     <section class="experience-section">
       <div class="experience-container">
-        <div class="experience-item fade-in">
-          <h3 class="experience-title">AI Software Engineering Intern</h3>
-
-          <div class="experience-company">
-            <i class="fas fa-building"></i> Merrill Manufacturing
+        <div class="experience-item fade-in" style="animation-delay: 0.1s">
+          <div class="experience-header">
+            <div>
+              <h3 class="experience-title">AI Software Engineering Intern</h3>
+              <div class="experience-company">
+                <i class="fas fa-building"></i> Merrill Manufacturing
+              </div>
+            </div>
+            <div class="experience-date">September 2025 – Present • Remote</div>
           </div>
-
-          <div class="experience-date">September 2025 – Present • Remote</div>
 
           <ul class="experience-list">
             <li>
               Engineered a full-stack AI assistant using <b>React</b>,
               <b>Flask (Python)</b>, <b>SuiteScript</b>, <b>PostgreSQL</b>, and
-              <b>NetSuite’s LLM module</b>, enabling employees to query live ERP
+              <b>NetSuite's LLM module</b>, enabling employees to query live ERP
               data in natural language.
             </li>
             <li>
@@ -373,21 +640,27 @@
               src="images/Merill-Manufacturing.webp"
               alt="Merrill Manufacturing Logo"
             />
-            <img src="images/Merrill.png" />
+            <img src="images/Merrill.png" alt="Merrill Project" />
           </div>
         </div>
 
-        <div class="experience-item fade-in">
-          <h3 class="experience-title">Database Administrator Intern</h3>
-          <div class="experience-company">
-            <i class="fas fa-building"></i> Uline
+        <div class="experience-item fade-in" style="animation-delay: 0.2s">
+          <div class="experience-header">
+            <div>
+              <h3 class="experience-title">Database Administrator Intern</h3>
+              <div class="experience-company">
+                <i class="fas fa-building"></i> Uline
+              </div>
+            </div>
+            <div class="experience-date">May 2025 - August 2025</div>
           </div>
-          <div class="experience-date">May 2025 - August 2025</div>
+
           <p class="experience-description">
             Responsible for optimizing SQL Server scripts, deploying database
             updates, and managing access permissions to support secure and
             efficient business operations.
           </p>
+
           <ul class="experience-list">
             <li>
               Optimized 2–3 SQL Server queries weekly, achieving up to 42%
@@ -405,24 +678,31 @@
               SYS/UAT/PROD, SSRS uploads, and automated tasks.
             </li>
           </ul>
+
           <div class="image-container">
             <img src="images/uline_logo.png" alt="Uline Logo" />
-            <img src="images/Uline.png" />
+            <img src="images/Uline.png" alt="Uline Project" />
           </div>
         </div>
 
-        <div class="experience-item fade-in">
-          <h3 class="experience-title">Lead Computer Science Tutor</h3>
-          <div class="experience-company">
-            <i class="fas fa-university"></i> Iowa State University - College of
-            Liberal Arts and Sciences
+        <div class="experience-item fade-in" style="animation-delay: 0.3s">
+          <div class="experience-header">
+            <div>
+              <h3 class="experience-title">Lead Computer Science Tutor</h3>
+              <div class="experience-company">
+                <i class="fas fa-university"></i> Iowa State University - College of
+                Liberal Arts and Sciences
+              </div>
+            </div>
+            <div class="experience-date">Aug 2024 – May 2025</div>
           </div>
-          <div class="experience-date">Aug 2024 – May 2025</div>
+
           <p class="experience-description">
             Tutored six different courses: Python, OOP, Data Structures,
             Discrete Math, Computer Architecture, and Design and Analysis of
             Algorithms.
           </p>
+
           <ul class="experience-list">
             <li>Assisting other tutors with help if needed.</li>
             <li>
@@ -430,15 +710,17 @@
               project completion rates and exam performance.
             </li>
           </ul>
+
           <div class="image-container">
             <img
               src="images/college_logo.png"
-              alt="Iowa State University - College of Liberal Arts and Sciences"
+              alt="Iowa State University Logo"
             />
-            <img src="images/Iowa.png" />
+            <img src="images/Iowa.png" alt="Iowa State" />
           </div>
-          <a
-            href="https://www.cs.iastate.edu/majors-and-minors/computer-science-help-room"
+
+          
+            <a href="https://www.cs.iastate.edu/majors-and-minors/computer-science-help-room"
             class="experience-link"
             target="_blank"
           >
@@ -447,18 +729,24 @@
           </a>
         </div>
 
-        <div class="experience-item fade-in">
-          <h3 class="experience-title">Computer Science Tutor</h3>
-          <div class="experience-company">
-            <i class="fas fa-university"></i> Iowa State University - College of
-            Liberal Arts and Sciences
+        <div class="experience-item fade-in" style="animation-delay: 0.4s">
+          <div class="experience-header">
+            <div>
+              <h3 class="experience-title">Computer Science Tutor</h3>
+              <div class="experience-company">
+                <i class="fas fa-university"></i> Iowa State University - College of
+                Liberal Arts and Sciences
+              </div>
+            </div>
+            <div class="experience-date">Aug 2023 – Aug 2024</div>
           </div>
-          <div class="experience-date">Aug 2023 – Aug 2024</div>
+
           <p class="experience-description">
             Assisted over 100 students in core computer science concepts such as
             Data Structures, Object-Oriented Programming (OOP), and Discrete
             Mathematics.
           </p>
+
           <ul class="experience-list">
             <li>
               Created examples for students to use and study for upcoming exams,
@@ -473,12 +761,13 @@
               Discrete Mathematics.
             </li>
           </ul>
+
           <div class="image-container">
             <img
               src="images/college_logo.png"
-              alt="Iowa State University - College of Liberal Arts and Sciences"
+              alt="Iowa State University Logo"
             />
-            <img src="images/Iowa.png" />
+            <img src="images/Iowa.png" alt="Iowa State" />
           </div>
         </div>
       </div>
@@ -500,16 +789,17 @@
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add("fade-in");
+              entry.target.style.animationPlayState = "running";
             }
           });
         },
         {
           threshold: 0.1,
-        },
+        }
       );
 
       document.querySelectorAll(".experience-item").forEach((el) => {
+        el.style.animationPlayState = "paused";
         observer.observe(el);
       });
     </script>
