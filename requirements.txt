@@ -14,3 +14,4 @@ python-multipart
 aiofiles
 pymongo
 redis==5.0.1
+uvicorn[standard]
