@@ -11,7 +11,7 @@ from uuid import uuid4
 import openai
 from pymongo import MongoClient
 
-# ====== LangChain & LLM Imports ======
+# ====== LangChain Imports ======
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -25,10 +25,10 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
 )
 
-# ====== SYSTEM PROMPT SETUP ======
+# ====== SYSTEM PROMPT ======
 system_prompt = (
     "You are a career assistant who gives helpful, concise answers about Naveen Prabakar "
-    "based on his resume and prior questions. Any irrelevant question asked should be dismissed professionally."
+    "based on his resume and prior questions. Any irrelevant question should be dismissed professionally."
 )
 
 system_msg = SystemMessagePromptTemplate.from_template(system_prompt)
@@ -40,53 +40,49 @@ human_msg = HumanMessagePromptTemplate.from_template(
 
 chat_prompt = ChatPromptTemplate.from_messages([system_msg, human_msg])
 
-# ====== ENVIRONMENT SETUP ======
-mongo_uri = os.getenv("MONGODB_ATLAS_URI")
-mongo_client = MongoClient(mongo_uri)
-db = mongo_client["qna_logs"]
-collection = db["qa_archive"]
-
+# ====== ENVIRONMENT ======
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-s3_bucket = os.getenv("S3_BUCKET_NAME")
+mongo_client = MongoClient(os.getenv("MONGODB_ATLAS_URI"))
+collection = mongo_client["qna_logs"]["qa_archive"]
+
 s3_client = boto3.client("s3")
+s3_bucket = os.getenv("S3_BUCKET_NAME")
 
-redis_url = os.getenv("REDIS_URL")
-if not redis_url:
-    raise ValueError("REDIS_URL not set")
-redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+redis_client = redis.Redis.from_url(
+    os.getenv("REDIS_URL"),
+    decode_responses=True
+)
 
-SESSION_TTL_SECONDS = 600  # 10 minutes
+SESSION_TTL_SECONDS = 600
 
-# ====== LOAD RESUME & BUILD VECTORSTORE ======
+# ====== LOAD RESUME ======
 loader = PyPDFLoader("cv.pdf")
 documents = loader.load()
 
 for doc in documents:
     doc.metadata["source"] = "resume"
 
-text_splitter = RecursiveCharacterTextSplitter(
+splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
     chunk_overlap=100,
 )
 
-docs = text_splitter.split_documents(documents)
+docs = splitter.split_documents(documents)
 
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 
-# ====== BUILD LLM + CHAINS ======
-llm = ChatOpenAI(
-    temperature=0,
-    model_name="gpt-4o",
-)
+# ====== BUILD CHAINS ======
+llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
 
 document_chain = create_stuff_documents_chain(llm, chat_prompt)
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+
 qa_chain = create_retrieval_chain(retriever, document_chain)
 
-# ====== FASTAPI SETUP ======
+# ====== FASTAPI ======
 app = FastAPI()
 
 app.add_middleware(
@@ -99,9 +95,7 @@ app.add_middleware(
 
 @app.middleware("http")
 async def attach_session_id(request: Request, call_next):
-    session_id = request.cookies.get("session_id")
-    if not session_id:
-        session_id = str(uuid4())
+    session_id = request.cookies.get("session_id") or str(uuid4())
     response = await call_next(request)
     response.set_cookie("session_id", session_id)
     return response
@@ -116,48 +110,22 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
 
     try:
         s3_client.download_file(s3_bucket, filename, local_path)
-    except ClientError as e:
-        if e.response["Error"]["Code"] == "404":
-            open(local_path, "w").close()
-        else:
-            raise
-
-    with open(local_path, "r") as f:
-        content = f.read().strip()
-        qna_pairs = content.split("\n\n") if content else []
-
-    if len(qna_pairs) >= 10:
-        to_offload = qna_pairs[:8]
-        remaining = qna_pairs[8:]
-
-        for entry in to_offload:
-            lines = entry.split("\n")
-            q = lines[0].replace("Question: ", "")
-            a = lines[1].replace("Answer: ", "")
-            collection.insert_one({
-                "question": q,
-                "answer": a,
-                "archived_at": datetime.utcnow()
-            })
-
-        with open(local_path, "w") as f:
-            f.write("\n\n".join(remaining))
+    except ClientError:
+        open(local_path, "w").close()
 
     with open(local_path, "a") as f:
-        f.write(f"Question: {question}\n")
-        f.write(f"Answer: {answer}\n\n")
+        f.write(f"Question: {question}\nAnswer: {answer}\n\n")
 
     with open(local_path, "rb") as f:
         s3_client.upload_fileobj(f, s3_bucket, filename)
 
     loader = TextLoader(local_path)
-    new_docs = loader.load()
-    new_splits = text_splitter.split_documents(new_docs)
+    new_docs = splitter.split_documents(loader.load())
 
-    for doc in new_splits:
+    for doc in new_docs:
         doc.metadata["source"] = "log"
 
-    vectorstore.add_documents(new_splits)
+    vectorstore.add_documents(new_docs)
 
 # ====== MAIN ENDPOINT ======
 @app.post("/ask")
@@ -169,47 +137,49 @@ def ask_question(
     session_id = http_request.cookies.get("session_id")
     redis_key = f"session:{session_id}"
 
-    history_json = redis_client.lrange(redis_key, 0, -1)
-    history = [json.loads(msg) for msg in history_json]
+    history = [
+        json.loads(x)
+        for x in redis_client.lrange(redis_key, 0, -1)
+    ]
 
     history.append({"role": "user", "content": request.query})
-    trimmed_history = history[-5:]
+    history = history[-5:]
 
     redis_client.delete(redis_key)
-    for msg in trimmed_history:
+    for msg in history:
         redis_client.rpush(redis_key, json.dumps(msg))
     redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
-    conversational_context = ""
-    for msg in trimmed_history:
+    context = ""
+    for msg in history:
         role = "User" if msg["role"] == "user" else "Assistant"
-        conversational_context += f"{role}: {msg['content']}\n"
+        context += f"{role}: {msg['content']}\n"
 
-    # ✅ FIXED: pass expected variables
+    # ✅ THIS IS THE CRITICAL FIX
     response = qa_chain.invoke({
-        "context": conversational_context,
-        "question": request.query,
+        "input": request.query,      # retriever
+        "question": request.query,   # prompt
+        "context": context           # prompt
     })
 
-    answer = response.get("answer", str(response))
+    answer = response["answer"]
 
     redis_client.rpush(
         redis_key,
-        json.dumps({"role": "assistant", "content": answer}),
+        json.dumps({"role": "assistant", "content": answer})
     )
     redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
     background_tasks.add_task(
         log_to_s3_and_update_embeddings,
         request.query,
-        answer,
+        answer
     )
 
     return {"answer": answer}
 
 # ====== CLEAR SESSION ======
 @app.post("/clear_session")
-def clear_session(http_request: Request):
-    session_id = http_request.cookies.get("session_id")
-    redis_client.delete(f"session:{session_id}")
-    return {"message": "Session memory cleared."}
+def clear_session(request: Request):
+    redis_client.delete(f"session:{request.cookies.get('session_id')}")
+    return {"message": "Session cleared"}
