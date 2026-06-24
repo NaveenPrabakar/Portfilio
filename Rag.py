@@ -5,13 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import boto3
 from botocore.exceptions import ClientError
 from datetime import datetime
-import redis
+# import redis  
 import json
 from uuid import uuid4
 import openai
 from pymongo import MongoClient
 
-# ====== LangChain Imports ======
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_community.embeddings import OpenAIEmbeddings
@@ -49,10 +48,11 @@ collection = mongo_client["qna_logs"]["qa_archive"]
 s3_client = boto3.client("s3")
 s3_bucket = os.getenv("S3_BUCKET_NAME")
 
-redis_client = redis.Redis.from_url(
-    os.getenv("REDIS_URL"),
-    decode_responses=True
-)
+# DISABLED REDIS
+# redis_client = redis.Redis.from_url(
+#     os.getenv("REDIS_URL"),
+#     decode_responses=True
+# )
 
 SESSION_TTL_SECONDS = 600
 
@@ -135,40 +135,37 @@ def ask_question(
     http_request: Request,
 ):
     session_id = http_request.cookies.get("session_id")
-    redis_key = f"session:{session_id}"
 
-    history = [
-        json.loads(x)
-        for x in redis_client.lrange(redis_key, 0, -1)
-    ]
+    # redis_key = f"session:{session_id}"
+    # history = [
+    #     json.loads(x)
+    #     for x in redis_client.lrange(redis_key, 0, -1)
+    # ]
+
+    # fallback: no persistent history
+    history = []
 
     history.append({"role": "user", "content": request.query})
     history = history[-5:]
-
-    redis_client.delete(redis_key)
-    for msg in history:
-        redis_client.rpush(redis_key, json.dumps(msg))
-    redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
     context = ""
     for msg in history:
         role = "User" if msg["role"] == "user" else "Assistant"
         context += f"{role}: {msg['content']}\n"
 
-    # ✅ THIS IS THE CRITICAL FIX
     response = qa_chain.invoke({
-        "input": request.query,      # retriever
-        "question": request.query,   # prompt
-        "context": context           # prompt
+        "input": request.query,
+        "question": request.query,
+        "context": context
     })
 
     answer = response["answer"]
 
-    redis_client.rpush(
-        redis_key,
-        json.dumps({"role": "assistant", "content": answer})
-    )
-    redis_client.expire(redis_key, SESSION_TTL_SECONDS)
+    # redis_client.rpush(
+    #     redis_key,
+    #     json.dumps({"role": "assistant", "content": answer})
+    # )
+    # redis_client.expire(redis_key, SESSION_TTL_SECONDS)
 
     background_tasks.add_task(
         log_to_s3_and_update_embeddings,
@@ -181,5 +178,5 @@ def ask_question(
 # ====== CLEAR SESSION ======
 @app.post("/clear_session")
 def clear_session(request: Request):
-    redis_client.delete(f"session:{request.cookies.get('session_id')}")
-    return {"message": "Session cleared"}
+    # redis_client.delete(f"session:{request.cookies.get('session_id')}")
+    return {"message": "Session cleared (no-op, Redis disabled)"}
