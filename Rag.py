@@ -4,11 +4,9 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 import boto3
 from botocore.exceptions import ClientError
-from datetime import datetime
-# import redis  
-import json
 from uuid import uuid4
-import openai
+import json
+
 from pymongo import MongoClient
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -24,7 +22,11 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
 )
 
-# ====== SYSTEM PROMPT ======
+from sentence_transformers import CrossEncoder
+
+# =========================
+# SYSTEM PROMPT
+# =========================
 system_prompt = (
     "You are a career assistant who gives helpful, concise answers about Naveen Prabakar "
     "based on his resume and prior questions. Any irrelevant question should be dismissed professionally."
@@ -39,8 +41,10 @@ human_msg = HumanMessagePromptTemplate.from_template(
 
 chat_prompt = ChatPromptTemplate.from_messages([system_msg, human_msg])
 
-# ====== ENVIRONMENT ======
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# =========================
+# ENV + CLIENTS
+# =========================
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 mongo_client = MongoClient(os.getenv("MONGODB_ATLAS_URI"))
 collection = mongo_client["qna_logs"]["qa_archive"]
@@ -48,15 +52,9 @@ collection = mongo_client["qna_logs"]["qa_archive"]
 s3_client = boto3.client("s3")
 s3_bucket = os.getenv("S3_BUCKET_NAME")
 
-# DISABLED REDIS
-# redis_client = redis.Redis.from_url(
-#     os.getenv("REDIS_URL"),
-#     decode_responses=True
-# )
-
-SESSION_TTL_SECONDS = 600
-
-# ====== LOAD RESUME ======
+# =========================
+# LOAD & INDEX RESUME
+# =========================
 loader = PyPDFLoader("cv.pdf")
 documents = loader.load()
 
@@ -73,16 +71,33 @@ docs = splitter.split_documents(documents)
 embeddings = OpenAIEmbeddings()
 vectorstore = FAISS.from_documents(docs, embeddings)
 
-# ====== BUILD CHAINS ======
+# =========================
+# RETRIEVER (over-retrieve for reranking)
+# =========================
+retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+
+# =========================
+# LLM + CHAIN
+# =========================
 llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
 
 document_chain = create_stuff_documents_chain(llm, chat_prompt)
 
-retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+# =========================
+# RERANKER (CROSS-ENCODER)
+# =========================
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-qa_chain = create_retrieval_chain(retriever, document_chain)
+def rerank_docs(query, docs, top_k=6):
+    pairs = [(query, doc.page_content) for doc in docs]
+    scores = reranker.predict(pairs)
 
-# ====== FASTAPI ======
+    ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
+    return [doc for doc, _ in ranked[:top_k]]
+
+# =========================
+# FASTAPI APP
+# =========================
 app = FastAPI()
 
 app.add_middleware(
@@ -103,7 +118,9 @@ async def attach_session_id(request: Request, call_next):
 class QueryRequest(BaseModel):
     query: str
 
-# ====== BACKGROUND TASK ======
+# =========================
+# BACKGROUND LOGGING
+# =========================
 def log_to_s3_and_update_embeddings(question: str, answer: str):
     filename = "q&a.txt"
     local_path = f"/tmp/{filename}"
@@ -127,46 +144,33 @@ def log_to_s3_and_update_embeddings(question: str, answer: str):
 
     vectorstore.add_documents(new_docs)
 
-# ====== MAIN ENDPOINT ======
+# =========================
+# MAIN ENDPOINT (RAG + RERANK)
+# =========================
 @app.post("/ask")
 def ask_question(
     request: QueryRequest,
     background_tasks: BackgroundTasks,
     http_request: Request,
 ):
-    session_id = http_request.cookies.get("session_id")
+    # Step 1: Retrieve
+    docs = retriever.get_relevant_documents(request.query)
 
-    # redis_key = f"session:{session_id}"
-    # history = [
-    #     json.loads(x)
-    #     for x in redis_client.lrange(redis_key, 0, -1)
-    # ]
+    # Step 2: Rerank
+    top_docs = rerank_docs(request.query, docs, top_k=3)
 
-    # fallback: no persistent history
-    history = []
+    # Step 3: Format simple context
+    context = "\n\n".join([doc.page_content for doc in top_docs])
 
-    history.append({"role": "user", "content": request.query})
-    history = history[-5:]
-
-    context = ""
-    for msg in history:
-        role = "User" if msg["role"] == "user" else "Assistant"
-        context += f"{role}: {msg['content']}\n"
-
-    response = qa_chain.invoke({
-        "input": request.query,
-        "question": request.query,
-        "context": context
+    # Step 4: LLM call
+    response = document_chain.invoke({
+        "context": context,
+        "question": request.query
     })
 
-    answer = response["answer"]
+    answer = response["output"] if "output" in response else response
 
-    # redis_client.rpush(
-    #     redis_key,
-    #     json.dumps({"role": "assistant", "content": answer})
-    # )
-    # redis_client.expire(redis_key, SESSION_TTL_SECONDS)
-
+    # Step 5: Background logging
     background_tasks.add_task(
         log_to_s3_and_update_embeddings,
         request.query,
@@ -175,8 +179,9 @@ def ask_question(
 
     return {"answer": answer}
 
-# ====== CLEAR SESSION ======
+# =========================
+# CLEAR SESSION
+# =========================
 @app.post("/clear_session")
 def clear_session(request: Request):
-    # redis_client.delete(f"session:{request.cookies.get('session_id')}")
-    return {"message": "Session cleared (no-op, Redis disabled)"}
+    return {"message": "Session cleared (no-op, storage disabled)"}
