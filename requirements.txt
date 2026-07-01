@@ -16,3 +16,4 @@ pymongo
 redis==5.0.1
 uvicorn[standard]
 fastapi
+sentence-transformers
