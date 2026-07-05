@@ -556,11 +556,44 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
+        .project-pair-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-pair-card {
+            background: var(--glass-dark);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .project-pair-title {
+            font-size: 1.4rem;
+            color: var(--light);
+        }
+
+        .project-pair-status {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .project-pair-description {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
         .recent-project-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
+            grid-template-columns: 1fr;
+            gap: 2rem;
         }
 
         .recent-project-text {
@@ -676,65 +709,42 @@
         <h2 class="section-title">Currently Working On</h2>
         <div class="recent-project">
             <div class="recent-project-content">
-                <div class="recent-project-text">
-                    <h3 class="recent-project-title">CacheDB</h3>
-                    <p class="recent-project-duration">Nov 2025 – Present</p>
-                    <p class="recent-project-description">
-                        A crash-consistent, high-performance cache database written in Java that combines
-                        in-memory caching with disk-backed persistence. CacheDB ensures durability and
-                        fast recovery using Write-Ahead Logging (WAL) and automatic replay on startup.
-                    </p>
-    
-                    <div class="project-features">
-                        <div class="feature">
-                            <i class="fas fa-database"></i>
-                            <span>Write-Ahead Logging (WAL) for durability</span>
+                <div class="project-pair-grid">
+                    <div class="project-pair-card">
+                        <p class="project-pair-status">Ongoing</p>
+                        <h3 class="project-pair-title">Fantast Football Assistant</h3>
+                        <p class="project-pair-description">
+                            A mobile-first app to help people with draft strategies, player projections, and more.
+                        </p>
+                        <div class="project-tech-stack">
+                            <span class="tech-tag">React Native</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Java (Spring Boot)</span>
+                            <span class="tech-tag">MySQL</span>
+                            <span class="tech-tag">MongoDB</span>
                         </div>
-                        <div class="feature">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>Automatic crash recovery via WAL replay</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-memory"></i>
-                            <span>In-memory caching with disk-backed persistence</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Real-time cache state monitoring dashboard</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-box"></i>
-                            <span>Packaged as a reusable Maven library</span>
-                        </div>
-                        <div class="feature">
-                            <i class="fas fa-plug"></i>
-                            <span>Published Maven plugin for easy integration</span>
-                        </div>
-                    </div>
-    
-                    <div class="project-tech-stack">
-                        <span class="tech-tag">Java</span>
-                        <span class="tech-tag">Maven</span>
-                        <span class="tech-tag">Write-Ahead Logging</span>
-                        <span class="tech-tag">Concurrency</span>
-                        <span class="tech-tag">Disk Persistence</span>
-                        <span class="tech-tag">Web Dashboard</span>
-                    </div>
-    
-                    <div style="margin-top: 1.5rem;">
-                        <a href="https://github.com/NaveenPrabakar/CacheDB"
-                           target="_blank"
-                           class="cta-button cta-primary"
-                           style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <a href="https://github.com/NaveenPrabakar/NFL-Fantasy-Football-app" target="_blank" class="cta-button cta-primary" style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; width: fit-content;">
                             <i class="fab fa-github"></i> GitHub
                         </a>
                     </div>
-                </div>
-    
-                <div class="recent-project-image">
-                    <img src="images/cacheDB.png"
-                         alt="CacheDB Architecture Diagram"
-                         class="project-architecture">
+
+                    <div class="project-pair-card">
+                        <p class="project-pair-status">Ongoing</p>
+                        <h3 class="project-pair-title">Research Assistant MCP</h3>
+                        <p class="project-pair-description">
+                            An MCP server that plugs into your AI to assist with research by letting you upload documents and query them for answers, data analysis, machine learning, and more.
+                        </p>
+                        <div class="project-tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">MCP</span>
+                            <span class="tech-tag">LLMs</span>
+                            <span class="tech-tag">Document Search</span>
+                            <span class="tech-tag">Data Analysis</span>
+                        </div>
+                        <a href="https://github.com/NaveenPrabakar/Research-Assistant-MCP-Server" target="_blank" class="cta-button cta-primary" style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; width: fit-content;">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
